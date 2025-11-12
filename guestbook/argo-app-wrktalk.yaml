@@ -1,0 +1,38 @@
+# app-guestbook.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+  
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mahima2601/argocd-example-apps.git
+    targetRevision: HEAD
+    path: helm-guestbook       # <--- this directory in the repo has a Helm chart
+    # helm:
+    #   # Optional values override (sample)
+    #   values: |
+    #     replicaCount: 2
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: replicaCount
+          value: "3"
+
+
+
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+
+  syncPolicy:
+    automated:
+      prune: true      # delete resources removed from Git
+      selfHeal: true   # if something drifts, Argo CD restores it
+    syncOptions:
+      - CreateNamespace=true
